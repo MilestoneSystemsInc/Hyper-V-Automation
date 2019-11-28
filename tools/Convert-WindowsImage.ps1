@@ -805,7 +805,8 @@ You can use the fields below to configure the VHD or VHDX that you want to creat
                 [ValidateNotNullOrEmpty()]
                 $text
             )
-            Write-Host "ERROR  : $($text)" -ForegroundColor (Get-Host).PrivateData.ErrorForegroundColor
+            #Write-Host "ERROR  : $($text)" -ForegroundColor (Get-Host).PrivateData.ErrorForegroundColor
+            Write-Host "ERROR  : $($text)" -ForegroundColor Red
         }
 
         ##########################################################################################
@@ -821,7 +822,7 @@ You can use the fields below to configure the VHD or VHDX that you want to creat
                 [ValidateNotNullOrEmpty()]
                 $text
             )
-            Write-Host "WARN   : $($text)" -ForegroundColor (Get-Host).PrivateData.WarningForegroundColor
+            Write-Host "WARN   : $($text)" -ForegroundColor Yellow #(Get-Host).PrivateData.WarningForegroundColor
         }
 
         ##########################################################################################

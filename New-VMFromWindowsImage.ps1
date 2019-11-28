@@ -38,9 +38,13 @@ param(
 $ErrorActionPreference = 'Stop'
 
 # Get default VHD path (requires administrative privileges)
-$vmms = gwmi -namespace root\virtualization\v2 Msvm_VirtualSystemManagementService
-$vmmsSettings = gwmi -namespace root\virtualization\v2 Msvm_VirtualSystemManagementServiceSettingData
-$vhdxPath = Join-Path $vmmsSettings.DefaultVirtualHardDiskPath "$VMName.vhdx"
+#$vmms = gwmi -namespace root\virtualization\v2 Msvm_VirtualSystemManagementService
+#$vmmsSettings = gwmi -namespace root\virtualization\v2 Msvm_VirtualSystemManagementServiceSettingData
+$vmms = Get-CimInstance -namespace root\virtualization\v2 Msvm_VirtualSystemManagementService
+$vmmsSettings = Get-CimInstance -namespace root\virtualization\v2 Msvm_VirtualSystemManagementServiceSettingData
+$vhdxPath = [IO.Path]::Combine($vmmsSettings.DefaultExternalDataRoot,"$VMName","Virtual Hard Disks","$VMName.vhdx")
+$vmPath = [IO.Path]::Combine($vmmsSettings.DefaultExternalDataRoot,$VMName,"Virtual Machines")
+$vmSnapshotPath = [IO.Path]::Combine($vmmsSettings.DefaultExternalDataRoot,$VMName,"Snapshots")
 
 # Create unattend.xml
 $unattendPath = .\New-WindowsUnattendFile.ps1 -AdministratorPassword $AdministratorPassword -Version $Version -ComputerName $VMName -Locale $Locale
@@ -52,7 +56,7 @@ Convert-WindowsImage -SourcePath $SourcePath -Edition $Edition -VHDPath $vhdxPat
 
 # Create VM
 Write-Verbose 'Creating VM...'
-$vm = New-VM -Name $VMName -Generation 2 -MemoryStartupBytes $MemoryStartupBytes -VHDPath $vhdxPath -SwitchName $VMSwitchName
+$vm = New-VM -Name $VMName -Generation 2 -MemoryStartupBytes $MemoryStartupBytes -Path $vmPath -VHDPath $vhdxPath -SwitchName $VMSwitchName
 $vm | Set-VMProcessor -Count $VMProcessorCount
 $vm | Get-VMIntegrationService -Name "Guest Service Interface" | Enable-VMIntegrationService -Passthru
 if ($EnableDynamicMemory) {
@@ -66,6 +70,7 @@ $command = Get-Command Set-VM
 if ($command.Parameters.AutomaticCheckpointsEnabled) {
     $vm | Set-VM -AutomaticCheckpointsEnabled $false
 }
+$vm | Set-VM -SnapshotFileLocation $vmSnapshotPath
 $vm | Start-VM
 
 # Wait for installation complete
