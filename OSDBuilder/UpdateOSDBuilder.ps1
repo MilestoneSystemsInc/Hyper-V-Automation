@@ -1,7 +1,3 @@
-#automate updating Reference images.
-#Updates OSDBuilder Powershell Module.
-#Updates Reference Images.
-
 # Update OSDBuilder PoweShell Module if there is one
 try {
     $Version = Get-ChildItem -Path "C:\Program Files\WindowsPowerShell\Modules\OSDBuilder" | Select-Object -First 1
@@ -16,10 +12,18 @@ catch {
 }
 
 #Update OS-Medias and create the iso.
-try { #previous media images revisions should be labeled "Superseded"
-    foreach ($OSMediaSource in (Get-OSMedia | where-object {$_.Revision -eq "OK"})) {
-        Update-OSMedia -Name $($OSMediaSource.Name) -Download -Execute 
-        New-OSBMediaISO -FullName $OSMediaSource.FullName
+try 
+{ 
+    #download and update all updates for current OSMedias
+    $newMedias = Get-osmedia | Where-Object {$_.revision -eq "OK"}
+    foreach($media in $newMedias){
+        update-osmedia -Name $media.name -download -execute -CreateISO
+    }
+
+    #delete superseded medias
+    $oldMedias = Get-OSMedia | Where-Object {$_.revision -eq "Superseded"}
+    foreach($media in $oldMedias){
+        Remove-Item $oldMedia.fullname -Recurse
     }
 }
 catch {
