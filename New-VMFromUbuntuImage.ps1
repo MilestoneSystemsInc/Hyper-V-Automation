@@ -68,10 +68,23 @@ function Normalize-MacAddress ([string]$value) {
 }
 
 # Get default VHD path (requires administrative privileges)
-$vmms = gwmi -namespace root\virtualization\v2 Msvm_VirtualSystemManagementService
-$vmmsSettings = gwmi -namespace root\virtualization\v2 Msvm_VirtualSystemManagementServiceSettingData
-$vhdxPath = Join-Path $vmmsSettings.DefaultVirtualHardDiskPath "$VMName.vhdx"
-$metadataIso = Join-Path $vmmsSettings.DefaultVirtualHardDiskPath "$VMName-metadata.iso"
+#$vmms = gwmi -namespace root\virtualization\v2 Msvm_VirtualSystemManagementService
+#$vmmsSettings = gwmi -namespace root\virtualization\v2 Msvm_VirtualSystemManagementServiceSettingData
+#$vhdxPath = Join-Path $vmmsSettings.DefaultVirtualHardDiskPath "$VMName.vhdx"
+#$metadataIso = Join-Path $vmmsSettings.DefaultVirtualHardDiskPath "$VMName-metadata.iso"
+$vmms = Get-CimInstance -namespace root\virtualization\v2 Msvm_VirtualSystemManagementService
+$vmmsSettings = Get-CimInstance -namespace root\virtualization\v2 Msvm_VirtualSystemManagementServiceSettingData
+$vhdRootPath = [IO.Path]::Combine($vmmsSettings.DefaultExternalDataRoot,"$VMName","Virtual Hard Disks")
+$vhdxPath = [IO.Path]::Combine($vhdRootPath,"$VMName.vhdx")
+$metadataIso = [IO.Path]::Combine($vhdRootPath, "$VMName-metadata.iso")
+$vmPath = [IO.Path]::Combine($vmmsSettings.DefaultExternalDataRoot,$VMName,"Virtual Machines")
+$vmSnapshotPath = [IO.Path]::Combine($vmmsSettings.DefaultExternalDataRoot,$VMName,"Snapshots")
+
+#Create the vhdx Root path if not exist
+if(-Not (Test-Path -Path $vhdRootPath))
+{
+	New-Item -ItemType Directory -Force -Path $vhdRootPath
+}
 
 # Convert cloud image to VHDX
 Write-Verbose 'Creating VHDX from cloud image...'
@@ -89,12 +102,15 @@ if ($VHDXSizeBytes) {
 
 # Create VM
 Write-Verbose 'Creating VM...'
-$vm = New-VM -Name $VMName -Generation 2 -MemoryStartupBytes $MemoryStartupBytes -VHDPath $vhdxPath -SwitchName $SwitchName
+$vm = New-VM -Name $VMName -Generation 2 -MemoryStartupBytes $MemoryStartupBytes -Path $vmPath -VHDPath $vhdxPath -SwitchName $SwitchName
 $vm | Set-VMProcessor -Count $ProcessorCount
 $vm | Get-VMIntegrationService -Name "Guest Service Interface" | Enable-VMIntegrationService
 if ($EnableDynamicMemory) {
     $vm | Set-VMMemory -DynamicMemoryEnabled $true 
 }
+# Sets Snapshot Path
+$vm | Set-VM -SnapshotFileLocation $vmSnapshotPath
+
 # Sets Secure Boot Template. 
 #   Set-VMFirmware -SecureBootTemplate 'MicrosoftUEFICertificateAuthority' doesn't work anymore (!?).
 $vm | Set-VMFirmware -SecureBootTemplateId ([guid]'272e7447-90a4-4563-a4b9-8e4ab00526ce')
