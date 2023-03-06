@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $isoFile = 'D:\VMMLibrary\ISOs\ubuntu-19.10-server-cloudimg-amd64.img'
 $vmName = 'VM-LINUXDOCKER'
 $fqdnName = 'VM-LINUXDOCKER.ascendium.ca'
-$pass = '$fqw#456'
+$pass = 'bozoleclown'
 $rootPublicKey = Get-Content "$env:USERPROFILE\.ssh\id_rsa.pub"
 $switchName = 'Ascendium - Logical Switch'
 
