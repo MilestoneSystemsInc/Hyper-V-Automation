@@ -83,17 +83,29 @@ if ($Locale) {
 }
 
 # Source: https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys
+#$key = switch ($Version){ 
+#    'Server2022Datacenter'  {'WX4NM-KYWYW-QJJR4-XV3QB-6VM33'}
+#    'Server2022Standard'    {'VDYBN-27WPP-V4HQT-9VMD4-VMK7H'}
+#    'Server2019Datacenter'  {'WMDGN-G9PQG-XVVXX-R3X43-63DFG'}
+#    'Server2019Standard'    {'N69G4-B89J2-4G8F4-WWYCC-J464C'}
+#    'Server2016Datacenter'  {'CB7KF-BWN84-R7R2Y-793K2-8XDDG'}
+#    'Server2016Standard'    {'WC2BQ-8NRM3-FDDYY-2BFGV-KHKQY'}
+#    'Windows10Enterprise'   {'NPPR9-FWDCX-D2C8J-H872K-2YT43'}
+#    'Windows10Professional' {'W269N-WFGWX-YVC9B-4J6C9-T83GX'}
+#    'Windows81Professional' {'GCRJD-8NW9H-F2CDX-CCM8D-9D6T9'}
+#}
+
+# Source: https://learn.microsoft.com/en-us/windows-server/get-started/automatic-vm-activation
 $key = switch ($Version){ 
-    'Server2022Datacenter'  {'WX4NM-KYWYW-QJJR4-XV3QB-6VM33'}
-    'Server2022Standard'    {'VDYBN-27WPP-V4HQT-9VMD4-VMK7H'}
-    'Server2019Datacenter'  {'WMDGN-G9PQG-XVVXX-R3X43-63DFG'}
-    'Server2019Standard'    {'N69G4-B89J2-4G8F4-WWYCC-J464C'}
-    'Server2016Datacenter'  {'CB7KF-BWN84-R7R2Y-793K2-8XDDG'}
-    'Server2016Standard'    {'WC2BQ-8NRM3-FDDYY-2BFGV-KHKQY'}
-    'Windows10Enterprise'   {'NPPR9-FWDCX-D2C8J-H872K-2YT43'}
-    'Windows10Professional' {'W269N-WFGWX-YVC9B-4J6C9-T83GX'}
-    'Windows81Professional' {'GCRJD-8NW9H-F2CDX-CCM8D-9D6T9'}
+    'Server2022Datacenter'  {'W3GNR-8DDXR-2TFRP-H8P33-DV9BG'}
+    'Server2022Standard'    {'YDFWN-MJ9JR-3DYRK-FXXRW-78VHK'}
+    'Server2019Datacenter'  {'H3RNG-8C32Q-Q8FRX-6TDXV-WMBMW'}
+    'Server2019Standard'    {'TNK62-RXVTB-4P47B-2D623-4GF74'}
+    'Server2016Datacenter'  {'TMJ3Y-NTRTM-FJYXT-T22BY-CWG3J'}
+    'Server2016Standard'    {'C3RCX-M6NRP-6CXC9-TW2F2-4RHYD'}
 }
+
+
 $xml.unattend.settings[0].component[0].ProductKey = $key
 
 $encodedPassword = [System.Text.Encoding]::Unicode.GetBytes($AdministratorPassword + 'AdministratorPassword')
